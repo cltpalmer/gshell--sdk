@@ -119,15 +119,21 @@ export async function loginUser({ username, password, accessKey }) {
   const res = await fetch(`${baseURL}/user-access/user-login/access/${accessKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    credentials: "include", // Optional: for hybrid mode
     body: JSON.stringify({ username, password })
   });
 
   const json = await res.json();
   if (!json.success) throw new Error(json.message || "Login failed");
 
-  return json.data;
+  // ✅ Save JWT token
+  if (json.token) {
+    localStorage.setItem("gshell_token", json.token);
+  }
+
+  return json.data; // Return user profile
 }
+
 
 // LogoutUser
 export async function logoutUser() {
@@ -159,10 +165,15 @@ export async function getMyRow({ accessKey, sheetName, matchWith, baseUrl = base
 
   const url = `${baseUrl}/user-access/user-row/${accessKey}/${sheetName}?${params.toString()}`;
 
+  const token = localStorage.getItem("gshell_token");
+
   const res = await fetch(url, {
     method: "GET",
-    credentials: "include"
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   });
+  
 
   const json = await res.json();
   if (!json.success) {
