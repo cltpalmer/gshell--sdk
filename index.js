@@ -155,13 +155,20 @@ export async function logoutUser() {
 
 
 // 🌐 Updated SDK - v2 getMyRow
-export async function getMyRow({ accessKey, sheetName, matchWith, baseUrl = baseURL }) {
+export async function getMyRow({
+  accessKey,
+  sheetName,
+  matchWith,
+  matchValue,
+  baseUrl = baseURL
+}) {
   if (!accessKey || !sheetName) {
     throw new Error("Missing required fields: accessKey and sheetName");
   }
 
   const params = new URLSearchParams();
-  if (matchWith) params.set("matchWith", matchWith); // 👈 inject if present
+  if (matchWith) params.set("matchWith", matchWith);
+  if (matchValue) params.set("matchValue", matchValue); // ✅ ADD THIS LINE
 
   const url = `${baseUrl}/user-access/user-row/${accessKey}/${sheetName}?${params.toString()}`;
 
@@ -173,7 +180,6 @@ export async function getMyRow({ accessKey, sheetName, matchWith, baseUrl = base
       Authorization: `Bearer ${token}`
     }
   });
-  
 
   const json = await res.json();
   if (!json.success) {
@@ -182,6 +188,7 @@ export async function getMyRow({ accessKey, sheetName, matchWith, baseUrl = base
 
   return json.data;
 }
+
 
 // 🌐 Updated SDK - v2 getAllMyRows
 export async function getAllMyRows({
